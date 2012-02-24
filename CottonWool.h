@@ -22,6 +22,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import <MessageUI/MessageUI.h>
+
 #define CWLog(...) ({if (@encode(__typeof__(self)) == @encode(Class)) {[CottonWool crumbWithString:[NSString stringWithFormat:__VA_ARGS__] class:(Class)self];} {[CottonWool crumbWithString:[NSString stringWithFormat:__VA_ARGS__] class:[(NSObject*)self class]];}})
 
 
@@ -29,5 +31,6 @@
 
 + (void) wrap;
 + (void) crumbWithString: (NSString *)name class: (Class)class;
++ (void) sendFeedback:(UIViewController <MFMailComposeViewControllerDelegate>* )viewController;
 
 @end

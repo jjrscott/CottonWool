@@ -166,4 +166,34 @@ void CottonWoolSignalHandler(NSInteger signal) {
         [self crumbWithString:name class:[object class]];
 }
 
++ (void) sendFeedback: (UIViewController <MFMailComposeViewControllerDelegate>*)viewController {
+  NSMutableString *body = [NSMutableString stringWithCapacity:1000];
+  
+  [body appendFormat:@"\n\n\nApp version: %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+  [body appendFormat:@"\nModel: %@", [CottonWool platform]];
+  UIDevice * device = [UIDevice currentDevice];
+  
+  [body appendFormat:@"\nSystem version: %@", [device systemVersion]];
+  
+  NSString *displayName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
+  NSString *subject = [NSString stringWithFormat:@"%@ Feedback", displayName];
+  
+  if ([MFMailComposeViewController canSendMail])
+  {
+    MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
+    picker.mailComposeDelegate = viewController;
+    
+    [picker setToRecipients:[NSArray arrayWithObject:COTTON_WOOL_EMAIL_ADDRESS]];
+    [picker setSubject:subject];
+    [picker setMessageBody:body isHTML:NO];
+    
+    [viewController presentModalViewController:picker animated:YES];
+    [picker release];
+  }
+  else
+  {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"mailto:" COTTON_WOOL_EMAIL_ADDRESS @"?subject=%@&body=%@",[subject stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [body stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]]];
+  }
+}
+
 @end
