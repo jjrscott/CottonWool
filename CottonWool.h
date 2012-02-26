@@ -32,5 +32,7 @@
 + (void) wrap;
 + (void) crumbWithString: (NSString *)name class: (Class)class;
 + (void) sendFeedback:(UIViewController <MFMailComposeViewControllerDelegate>* )viewController;
++ (void) setEndFunction:(void (*)())function;
++ (void) setLogToConsole:(BOOL)logToConsole;
 
 @end

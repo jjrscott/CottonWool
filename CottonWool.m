@@ -38,7 +38,8 @@ struct BreadCrumb {
 
 static volatile int32_t  currentBreadcrumbIndex;
 static struct BreadCrumb * breadcrumbs;
-
+void (*endFunction)(void);
+BOOL shouldLogToConsole;
 
 @interface CottonWool (Private)
 
@@ -59,6 +60,13 @@ void CottonWoolSignalHandler(NSInteger signal) {
 
 
 @implementation CottonWool
+
++(void)initialize
+{
+        endFunction = NULL;
+        shouldLogToConsole = NO;
+}
+
 
 + (NSArray *)backtrace: (NSUInteger)start {
         void *callstack[128];
@@ -87,6 +95,8 @@ void CottonWoolSignalHandler(NSInteger signal) {
 }
 
 + (void)callHome: (NSString *)message {
+        if (endFunction != NULL)
+                endFunction();
         // Get the app's name
         NSString *displayName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
         // Make email subject
@@ -158,7 +168,8 @@ void CottonWoolSignalHandler(NSInteger signal) {
         breadcrumbs[index].className = (char *) malloc(sizeof(char) * ([className length]));
         strcpy(breadcrumbs[index].className, [className UTF8String]);
         
-        NSLog(@"%-3d %@ %@\n", newIndex, [NSString stringWithUTF8String:breadcrumbs[index].className], name);
+        if (shouldLogToConsole)
+                NSLog(@"%-3d %@ %@\n", newIndex, [NSString stringWithUTF8String:breadcrumbs[index].className], name);
 }
 
 
@@ -194,6 +205,16 @@ void CottonWoolSignalHandler(NSInteger signal) {
   {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"mailto:" COTTON_WOOL_EMAIL_ADDRESS @"?subject=%@&body=%@",[subject stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [body stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]]];
   }
+}
+
++ (void) setEndFunction:(void (*)())function
+{
+  endFunction = function;
+}
+
++ (void) setLogToConsole:(BOOL)logToConsole
+{
+  shouldLogToConsole = logToConsole;
 }
 
 @end
