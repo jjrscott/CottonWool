@@ -24,6 +24,13 @@
 
 #import <MessageUI/MessageUI.h>
 
+// Setup macros to run ARC/non ARC specific code
+#define CWRelease(OBJ) ;
+#else
+#define CWRelease(OBJ) [OBJ release];
+#endif
+
+
 #define CWLog(...) ({if (@encode(__typeof__(self)) == @encode(Class)) {[CottonWool crumbWithString:[NSString stringWithFormat:__VA_ARGS__] class:(Class)self];} {[CottonWool crumbWithString:[NSString stringWithFormat:__VA_ARGS__] class:[(NSObject*)self class]];}})
 
 
