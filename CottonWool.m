@@ -61,7 +61,7 @@ void CottonWoolSignalHandler(NSInteger signal) {
 
 @implementation CottonWool
 
-+(void)initialize
++ (void)initialize
 {
         endFunction = NULL;
         shouldLogToConsole = NO;
@@ -199,7 +199,7 @@ void CottonWoolSignalHandler(NSInteger signal) {
     [picker setMessageBody:body isHTML:NO];
     
     [viewController presentModalViewController:picker animated:YES];
-    [picker release];
+    CWRelease(picker);
   }
   else
   {
