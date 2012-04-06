@@ -34,7 +34,7 @@
 #endif
 
 
-#define CWLog(...) ({if (@encode(__typeof__(self)) == @encode(Class)) {[CottonWool crumbWithString:[NSString stringWithFormat:__VA_ARGS__] class:(Class)self];} {[CottonWool crumbWithString:[NSString stringWithFormat:__VA_ARGS__] class:[(NSObject*)self class]];}})
+#define CWLog(...) ([CottonWool crumbWithString:[NSString stringWithFormat:__VA_ARGS__] class:[self class]])
 
 
 @interface CottonWool : NSObject
