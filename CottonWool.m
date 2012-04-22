@@ -30,7 +30,7 @@
 
 struct BreadCrumb {
         char *crumbString;
-        char *className;
+        Class class;
 };
 
 #define BREADCRUMB_COUNT (128)
@@ -112,20 +112,25 @@ void CottonWoolSignalHandler(NSInteger signal) {
         [body appendFormat:@"Model: %@\n", [CottonWool platform]];
         [body appendFormat:@"System version: %@\n", [[UIDevice currentDevice] systemVersion]];
         
+  
+        // Backtrace
+  
+        [body appendFormat:@"Backtrace: %@", [self backtrace:0]];
+  
         // Insert the breadcrumbs
         [body appendString:@"Breadcrumbs:\n"];
         
         for (NSInteger breadcrumbIndex = MAX(0, currentBreadcrumbIndex - BREADCRUMB_COUNT); breadcrumbIndex < currentBreadcrumbIndex; breadcrumbIndex++) {
                 
                 if ([NSString stringWithUTF8String:breadcrumbs[breadcrumbIndex].crumbString] != nil) {
-                        NSString *classNameText = [NSString stringWithUTF8String:breadcrumbs[breadcrumbIndex % BREADCRUMB_COUNT].className];
+                        NSString *classNameText = NSStringFromClass(breadcrumbs[breadcrumbIndex % BREADCRUMB_COUNT].class);
                         
                         
                         if ([classNameText length] < BREADCRUMB_PADDING) {
                                 classNameText = [classNameText stringByPaddingToLength:BREADCRUMB_PADDING withString:@" " startingAtIndex:0];
                         }
                         
-                        [body appendFormat:@"%-3d %@ %@\n", breadcrumbIndex, classNameText, [NSString stringWithUTF8String:breadcrumbs[breadcrumbIndex % BREADCRUMB_COUNT].crumbString]];
+                        [body appendFormat:@"%-3d %@ %@\n", breadcrumbIndex, classNameText, [NSString stringWithCString:breadcrumbs[breadcrumbIndex % BREADCRUMB_COUNT].crumbString encoding:NSUTF8StringEncoding]];
                 }
         }
         
@@ -159,17 +164,16 @@ void CottonWoolSignalHandler(NSInteger signal) {
         int32_t index = newIndex % BREADCRUMB_COUNT;
         
         free(breadcrumbs[index].crumbString);
-        breadcrumbs[index].crumbString = (char *) malloc(sizeof(char) * ([name length]));
-        strcpy(breadcrumbs[index].crumbString, [name UTF8String]);
-        
-        NSString *className = NSStringFromClass(class);
-        
-        free(breadcrumbs[index].className);
-        breadcrumbs[index].className = (char *) malloc(sizeof(char) * ([className length]));
-        strcpy(breadcrumbs[index].className, [className UTF8String]);
+        NSUInteger crumbStringLength = [name lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+  
+        breadcrumbs[index].crumbString = (char *) malloc(sizeof(char) * crumbStringLength);
+        [name getCString:breadcrumbs[index].crumbString maxLength:crumbStringLength encoding:NSUTF8StringEncoding];      
+  
+  
+        breadcrumbs[index].class = class;
         
         if (shouldLogToConsole)
-                NSLog(@"%-3d %@ %@\n", newIndex, [NSString stringWithUTF8String:breadcrumbs[index].className], name);
+                NSLog(@"%-3d %@ %@\n", newIndex, NSStringFromClass(class), name);
 }
 
 
